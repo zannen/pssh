@@ -1,4 +1,4 @@
-package pssh
+package main
 
 import (
 	"bytes"

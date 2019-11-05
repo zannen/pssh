@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/zannen/pssh"
 	"github.com/zannen/pssh/expand"
 
 	"golang.org/x/crypto/ssh"
@@ -50,7 +49,7 @@ func main() {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // ssh.FixedHostKey(hostKey),
 	}
 
-	mcon := pssh.NewMultipleConnection()
+	mcon := NewMultipleConnection()
 
 	hostsList, err := expand.Expand(hosts)
 	if err != nil {
