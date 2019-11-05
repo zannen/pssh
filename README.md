@@ -32,7 +32,24 @@ pssh \
     -command 'echo "More commands"'
 ```
 
-## Command examples
+## Arguments
+
+* `-command` (string(s)) See below.
+* `-colour` (boolean) Produce colour output
+* `-hosts`(string) List of hosts for ssh connections
+    * Use "`a;b;c`" to specify three hosts, `a`, `b` and `c`
+    * Use "`node[0-2,5].example.com`" to specify `node0.example.com`, `node1.example.com`, `node2.example.com` and `node5.example.com`
+    * Use "`{london,paris,berlin}.example.com`" to specify `london.example.com`, `paris.example.com` and `berlin.example.com`
+    * The above can be combined to a limited extent, e.g. use "`aaa;pre{bbb[1-3],ccc[5,8]}post;zzz`" to specify:
+        * `aaa`
+        * `prebbb1post`, `prebbb2post`, `prebbb3post`
+        * `preccc5post`, `preccc8post`
+        * `zzz`
+* `-key` (string) Name of private key file, e.g. `$HOME/.ssh/id_rsa`
+* `-verbose` (boolean) Produce verbose output
+* `-user` (string) User name for ssh connections
+
+### Commands
 
 * Check for file contents, and abort if contents do not exist on _all_ hosts:
 
