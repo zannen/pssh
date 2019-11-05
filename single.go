@@ -42,12 +42,10 @@ func NewConnection(cfg *ssh.ClientConfig, network, hostPort string) *Connection 
 }
 
 func (c *Connection) dial() error {
-	fmt.Printf("%s: Connecting...\n", c.hostPort)
 	client, err := ssh.Dial(c.network, c.hostPort, c.cfg)
 	if err != nil {
 		return errors.Wrap(err, "Failed to dial")
 	}
-	fmt.Printf("%s: Connected.\n", c.hostPort)
 	c.client = client
 	return nil
 }
