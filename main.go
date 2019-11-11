@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/zannen/pssh/expand"
 
@@ -31,20 +32,36 @@ const (
 	COLSTDOUT = "stdout"
 )
 
-func main() {
-	var commands stringSlice
-	var keyFilename, sshUsername, hosts string
-	var colour, verbose bool
-	flag.StringVar(&keyFilename, "key", "", "Name of private key file")
-	flag.StringVar(&sshUsername, "user", "", "User name for ssh connections")
-	flag.StringVar(&hosts, "hosts", "", "List of hosts for ssh connections")
-	flag.BoolVar(&colour, "colour", false, "Produce colour output")
-	flag.BoolVar(&verbose, "verbose", false, "Produce verbose output")
-	flag.Var(&commands, "command", "Command(s) to run on hosts")
+type options struct {
+	colour      bool
+	commands    stringSlice
+	hosts       string
+	keyFilename string
+	sshUsername string
+	timeout     int // seconds
+	verbose     bool
+}
+
+func parseArgs() *options {
+	o := options{}
+	flag.BoolVar(&o.colour, "colour", false, "Produce colour output")
+	flag.Var(&o.commands, "command", "Command(s) to run on hosts")
+	flag.StringVar(&o.hosts, "hosts", "", "List of hosts for ssh connections")
+	flag.StringVar(&o.keyFilename, "key", "", "Name of private key file")
+	flag.StringVar(&o.sshUsername, "user", "", "User name for ssh connections")
+	flag.IntVar(&o.timeout, "timeout", 10, "Timeout for initial ssh connections")
+	flag.BoolVar(&o.verbose, "verbose", false, "Produce verbose output")
 	flag.Parse()
 
+	return &o
+}
+
+
+func main() {
+	args := parseArgs()
+
 	col := make(map[string]string)
-	if colour {
+	if args.colour {
 		col[COLCMD] = "\033[36;1m" // cyan bold
 		col[COLERR] = "\033[31;1;7m" // red bold inverse
 		col[COLRESET] = "\033[0m" // reset
@@ -58,7 +75,7 @@ func main() {
 		col[COLSTDOUT] = ""
 	}
 
-	key, err := ioutil.ReadFile(keyFilename)
+	key, err := ioutil.ReadFile(args.keyFilename)
 	if err != nil {
 		log.Fatalf("unable to read private key: %v", err)
 	}
@@ -70,14 +87,15 @@ func main() {
 	}
 
 	config := ssh.ClientConfig{
-		User:            sshUsername,
+		User:            args.sshUsername,
 		Auth:            []ssh.AuthMethod{ssh.PublicKeys(signer)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // ssh.FixedHostKey(hostKey),
+		Timeout:         time.Duration(args.timeout) * time.Second,
 	}
 
 	mcon := NewMultipleConnection()
 
-	hostsList, err := expand.Expand(hosts)
+	hostsList, err := expand.Expand(args.hosts)
 	if err != nil {
 		log.Fatalf("unable to parse hosts list: %v", err)
 	}
@@ -86,8 +104,8 @@ func main() {
 	}
 
 	code := 0
-	for _, cmd := range commands {
-		if verbose {
+	for _, cmd := range args.commands {
+		if args.verbose {
 			fmt.Printf("%sCommand%s: %s\n", col[COLCMD], col[COLRESET], cmd)
 		}
 		mcon.Command(cmd)
