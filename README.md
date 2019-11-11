@@ -46,8 +46,9 @@ pssh \
         * `preccc5post`, `preccc8post`
         * `zzz`
 * `-key` (string) Name of private key file, e.g. `$HOME/.ssh/id_rsa`
-* `-verbose` (boolean) Produce verbose output
+* `-timeout` (int) Timeout (in seconds) of the initial ssh connections
 * `-user` (string) User name for ssh connections
+* `-verbose` (boolean) Produce verbose output
 
 ### Commands
 
